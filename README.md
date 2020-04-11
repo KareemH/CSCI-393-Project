@@ -1,5 +1,7 @@
 # CSCI-393-Project
 
+[Project Details](https://github.com/KareemH/CSCI-393-Project/files/4464903/Screen.Shot.2020-04-11.at.12.0.pdf)
+
 ## General Overview
 ![image](https://user-images.githubusercontent.com/40571613/79048483-5746a500-7beb-11ea-953f-a18415c340c9.png)
 
