@@ -28,8 +28,11 @@ end of the fragments */
 
 //---------------------------------------------------------------------------------------------------------------------------------------
 // Global variables:
+let single_fragments_one_eb = [];
+let interior_extended_bases = [];
+let non_single_fragments = [];
 
-var abnormal_fragments;
+var abnormal_fragments = [];
 
 
 
@@ -86,6 +89,7 @@ function refragmentTheInput(g_enzyme_set, uc_enzyme_set) {
 
   // Pass the refragmentation of each fragment to find their extended bases
   findExtendedBases(refragmented_g_set, refragmented_uc_set);
+  checkForAbnormalFragments(refragmented_g_set, refragmented_uc_set);
 }
 
 
@@ -100,8 +104,6 @@ end of the fragments */
 // B) These are C, U, AU, AC, G
 // 1) C, U, AU, AC and 2) G
 function findExtendedBases(refragmented_g_set, refragmented_uc_set) {
-  let single_fragments_one_eb = [];
-  let interior_extended_bases = [];
 
   //-------------------------Single extended base code------------------------------------------
   // A single extended base does not straddle the /
@@ -113,6 +115,7 @@ function findExtendedBases(refragmented_g_set, refragmented_uc_set) {
   console.log(array_g_set);
   console.log("Refragmented U.C-set (G applied already) : " + array_uc_set);
   console.log(array_uc_set);
+
 
   for (let i = 0; i < array_g_set.length; i++) {
     // If an index contains an instance of a /, then it is not a single extended base, continue
@@ -170,5 +173,38 @@ function findExtendedBases(refragmented_g_set, refragmented_uc_set) {
 
   //-------------------------------------------------------------------------------------------
 
+  //-------------------------Non-single fragment code---------------------------------------
+  for (let i = 0; i < array_g_set.length; i++) {
+    // If an index contains an instance of a /, then it is not a single extended base, continue
+    if (array_g_set[i].includes("/")) {
+      non_single_fragments.push(array_g_set[i]);
+    }
+  }
 
+  for (let i = 0; i < array_uc_set.length; i++) {
+    // If an index contains an instance of a /, then it is not a single extended base, continue
+    if (array_uc_set[i].includes("/")) {
+      non_single_fragments.push(array_uc_set[i]);
+    }
+  }
+
+  console.log("All non-single fragments : " + non_single_fragments);
+  console.log(non_single_fragments);
+  //-------------------------------------------------------------------------------------------
+}
+
+function checkForAbnormalFragments(refragmented_g_set, refragmented_uc_set){
+  let array_g_set = refragmented_g_set.split(" ");
+  let array_uc_set = refragmented_uc_set.split(" ");
+
+  for(let i = 0; i < array_g_set.length; i++){
+    let examine_last_char_in_fragment = array_g_set[i];
+    let fragment_length = examine_last_char_in_fragment.length;
+
+    if(examine_last_char_in_fragment[fragment_length-1] != 'G'){
+      abnormal_fragments.push(array_g_set[i]);
+    }
+  }
+
+  console.log("Fragments that are abnormal : " + abnormal_fragments);
 }
