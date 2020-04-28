@@ -1,5 +1,7 @@
 // jshint esversion:6
 
+// var jsnx = require('jsnetworkx');
+// var jsnx =
 // 1) (G-enzyme): AUCG, AUG, G, CU, ACUAUACG
 // AUCG AUG G CU ACUAUACG
 // 2) (U.C.-enzyme): GGAC, U, AU, GAU, C, U, AC, GC, AU
@@ -28,13 +30,12 @@ end of the fragments */
 
 //---------------------------------------------------------------------------------------------------------------------------------------
 // Global variables:
-let single_fragments_one_eb = [];
-let interior_extended_bases = [];
-let non_single_fragments = [];
-
+var single_fragments_one_eb = [];
+var interior_extended_bases = [];
+var non_single_fragments = [];
 var abnormal_fragments = [];
-
-
+var nodes = [];
+var graph;
 
 var receiveInput = function() {
   let g_enzyme_set = $("#G-enzyme-set").val(); // Receive the user's fragmented RNA chain after the G-enzyme has been applied
@@ -175,14 +176,14 @@ function findExtendedBases(refragmented_g_set, refragmented_uc_set) {
 
   //-------------------------Non-single fragment code---------------------------------------
   for (let i = 0; i < array_g_set.length; i++) {
-    // If an index contains an instance of a /, then it is not a single extended base, continue
+    //
     if (array_g_set[i].includes("/")) {
       non_single_fragments.push(array_g_set[i]);
     }
   }
 
   for (let i = 0; i < array_uc_set.length; i++) {
-    // If an index contains an instance of a /, then it is not a single extended base, continue
+
     if (array_uc_set[i].includes("/")) {
       non_single_fragments.push(array_uc_set[i]);
     }
@@ -190,8 +191,11 @@ function findExtendedBases(refragmented_g_set, refragmented_uc_set) {
 
   console.log("All non-single fragments : " + non_single_fragments);
   console.log(non_single_fragments);
-  //-------------------------------------------------------------------------------------------
+
+  determineNodesAndEdges();
+
 }
+  //-------------------------------------------------------------------------------------------
 
 function checkForAbnormalFragments(refragmented_g_set, refragmented_uc_set){
   let array_g_set = refragmented_g_set.split(" ");
@@ -207,4 +211,45 @@ function checkForAbnormalFragments(refragmented_g_set, refragmented_uc_set){
   }
 
   console.log("Fragments that are abnormal : " + abnormal_fragments);
+}
+
+function determineNodesAndEdges(){
+  for(let i = 0; i < non_single_fragments.length; i++){
+    let fragmented_pieces = non_single_fragments[i].split("/");
+    if(nodes.includes(fragmented_pieces[0])){
+      continue;
+    }
+
+    else{
+      nodes.push(fragmented_pieces[0]);
+    }
+  }
+
+  console.log("These are all the nodes in the graphs : " + nodes);
+  console.log(nodes);
+  createGraph();
+}
+
+function createGraph(){
+  graph = new jsnx.MultiDiGraph();
+
+  graph.addNodesFrom(nodes);
+  console.log(graph.nodes());
+
+  graph.addEdge("AU", "G");
+  graph.addEdge("G", "AU");
+  graph.addEdge("G", "AC");
+  graph.addEdge("AC", "G");
+  graph.addEdge("G", "AU");
+  graph.addEdge("G", "C");
+  // graph
+
+  jsnx.draw(graph, {
+    element: '#canvas',
+    withLabels: true,
+    nodeAttr:{
+      r: 15
+    },
+    stickyDrag: true
+});
 }
