@@ -35,6 +35,9 @@ var interior_extended_bases = [];
 var non_single_fragments = [];
 var abnormal_fragments = [];
 var nodes = [];
+var startNode;
+var endNode;
+var nodes_and_weighted_arcs = [];
 var graph;
 
 var receiveInput = function() {
@@ -88,9 +91,9 @@ function refragmentTheInput(g_enzyme_set, uc_enzyme_set) {
 
   console.log("Applying G enzyme to U.C.-enzyme-set : " + refragmented_uc_set);
 
+  checkForAbnormalFragments(refragmented_g_set, refragmented_uc_set);
   // Pass the refragmentation of each fragment to find their extended bases
   findExtendedBases(refragmented_g_set, refragmented_uc_set);
-  checkForAbnormalFragments(refragmented_g_set, refragmented_uc_set);
 }
 
 
@@ -210,6 +213,9 @@ function checkForAbnormalFragments(refragmented_g_set, refragmented_uc_set){
     }
   }
 
+  let fragmented_pieces = abnormal_fragments[0].split("/");
+  endNode = fragmented_pieces[fragmented_pieces.size-1];
+
   console.log("Fragments that are abnormal : " + abnormal_fragments);
 }
 
@@ -227,6 +233,65 @@ function determineNodesAndEdges(){
 
   console.log("These are all the nodes in the graphs : " + nodes);
   console.log(nodes);
+
+  startNode = nodes[0];
+
+  for(let i = 0; i < non_single_fragments.length; i++){
+    let fragmented_pieces = non_single_fragments[i].split("/");
+    let abnormal_pieces = abnormal_fragments[0].split("/");
+
+    if(fragmented_pieces.length === 2){
+
+      if(fragmented_pieces.includes(abnormal_pieces[abnormal_pieces.length-1])){
+        let nodes_and_their_edges = {
+          firstNode: fragmented_pieces[0],
+          secondNode: startNode,
+          weightOnArc: abnormal_pieces[abnormal_pieces.length-1]
+        };
+        nodes_and_weighted_arcs.push(nodes_and_their_edges);
+      }
+
+      else{
+        let nodes_and_their_edges = {
+          firstNode: fragmented_pieces[0],
+          secondNode: fragmented_pieces[1],
+          weightOnArc: null
+        };
+        nodes_and_weighted_arcs.push(nodes_and_their_edges);
+      }
+    }
+
+    else if(fragmented_pieces.length === 3){
+      let nodes_and_their_edges = {
+        firstNode: fragmented_pieces[0],
+        secondNode: fragmented_pieces[2],
+        weightOnArc: fragmented_pieces[1]
+      };
+      nodes_and_weighted_arcs.push(nodes_and_their_edges);
+    }
+
+    else{
+      let complete_edge = "";
+      for(let i = 1; i < fragmented_pieces.length-1; i++){
+        if(i + 1 === fragmented_pieces.length-1){
+          complete_edge = complete_edge + fragmented_pieces[i];
+        }
+        else{
+          complete_edge = complete_edge + fragmented_pieces[i] + "/";
+        }
+      }
+
+      let nodes_and_their_edges = {
+        firstNode: fragmented_pieces[0],
+        secondNode: fragmented_pieces[fragmented_pieces.length-1],
+        weightOnEdge: complete_edge
+      };
+      nodes_and_weighted_arcs.push(nodes_and_their_edges);
+    }
+  }
+
+  console.log("These are all the nodes and their associated arcs : " + nodes_and_weighted_arcs);
+  console.log(nodes_and_weighted_arcs);
   createGraph();
 }
 
@@ -236,12 +301,15 @@ function createGraph(){
   graph.addNodesFrom(nodes);
   console.log(graph.nodes());
 
-  graph.addEdge("AU", "G");
-  graph.addEdge("G", "AU");
-  graph.addEdge("G", "AC");
-  graph.addEdge("AC", "G");
-  graph.addEdge("G", "AU");
-  graph.addEdge("G", "C");
+  for(let i = 0; i < nodes_and_weighted_arcs.length; i++){
+    graph.addEdge(nodes_and_weighted_arcs[i].firstNode, nodes_and_weighted_arcs[i].secondNode);
+  }
+
+  // graph.addEdge("AU", "G");
+  // graph.addEdge("G", "AU");
+  // graph.addEdge("G", "AC");
+  // graph.addEdge("AC", "G");
+  // graph.addEdge("G", "C");
   // graph
 
   jsnx.draw(graph, {

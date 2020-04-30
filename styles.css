@@ -1,0 +1,13 @@
+.container{
+  display: inline-flex;
+}
+
+ /* .informaton{
+  display: inline-flex;
+} */
+
+#canvas{
+  display: inline-flex;
+  height: 200px;
+  width: 200px;
+}
