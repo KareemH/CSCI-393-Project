@@ -302,8 +302,10 @@ function createGraph(){
   console.log(graph.nodes());
 
   for(let i = 0; i < nodes_and_weighted_arcs.length; i++){
-    graph.addEdge(nodes_and_weighted_arcs[i].firstNode, nodes_and_weighted_arcs[i].secondNode);
+    graph.addEdge(nodes_and_weighted_arcs[i].firstNode, nodes_and_weighted_arcs[i].secondNode, {weight: nodes_and_weighted_arcs[i].weightOnArc} );
   }
+  console.log("This is jsnetworkx graph data:" + graph.edges(true));
+  console.log(graph.edges(true));
 
   // graph.addEdge("AU", "G");
   // graph.addEdge("G", "AU");
