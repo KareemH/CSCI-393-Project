@@ -416,7 +416,7 @@ function multigraphEulerianCircuit()
     }
     
       curr_vertex = temp_var;
-      path.pop();`  `
+      path.pop();
     
   }
    
