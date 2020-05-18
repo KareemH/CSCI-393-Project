@@ -39,6 +39,10 @@ var startNode;
 var endNode;
 var nodes_and_weighted_arcs = [];
 var graph;
+var path = [];
+var circuit = [];
+let curr_vertex;
+var adjacents = [];
 
 var receiveInput = function() {
   let g_enzyme_set = $("#G-enzyme-set").val(); // Receive the user's fragmented RNA chain after the G-enzyme has been applied
@@ -214,7 +218,7 @@ function checkForAbnormalFragments(refragmented_g_set, refragmented_uc_set){
   }
 
   let fragmented_pieces = abnormal_fragments[0].split("/");
-  endNode = fragmented_pieces[fragmented_pieces.size-1];
+  endNode = fragmented_pieces[fragmented_pieces.length-1];
 
   console.log("Fragments that are abnormal : " + abnormal_fragments);
 }
@@ -284,7 +288,8 @@ function determineNodesAndEdges(){
       let nodes_and_their_edges = {
         firstNode: fragmented_pieces[0],
         secondNode: fragmented_pieces[fragmented_pieces.length-1],
-        weightOnEdge: complete_edge
+        // weightOnEdge: complete_edge
+        weightOnArc: complete_edge
       };
       nodes_and_weighted_arcs.push(nodes_and_their_edges);
     }
@@ -294,6 +299,179 @@ function determineNodesAndEdges(){
   console.log(nodes_and_weighted_arcs);
   createGraph();
 }
+
+function multigraphEulerianCircuit()
+{
+  
+  let edge_count = []; //container that will hold vertices and their number of edges
+  // this for loop is to get all the nodes and its adjacents
+  for(let i = 0; i < nodes.length; i++)
+  {
+    // console.log("for node: " + nodes[i]);
+    let temp_adj =[];
+    let temp_weighted_arcs = [];
+    for(let j = 0; j < nodes_and_weighted_arcs.length; j++)
+    {
+      if(nodes_and_weighted_arcs[j].firstNode == nodes[i])
+      {
+        temp_adj.push(nodes_and_weighted_arcs[j].secondNode);
+        
+        temp_weighted_arcs.push(nodes_and_weighted_arcs[j].weightOnArc);  
+       
+
+      }
+      
+    }
+
+    // let new_temp =[];
+    // if(temp_adj.length >2){
+    //   for(let i = 0; i< temp_adj.length; i++){
+    //     new_temp[i] = temp_adj[i];
+    //   }
+    //   for(let i = 0; i< new_temp.length; i++)
+    //   {
+    //     if(new_temp[i] == startNode){
+    //       let temp_var= temp_adj[0];
+    //       temp_adj[0] = new_temp[i];
+    //       temp_adj[i] = temp_var;
+    //     }
+    //   }
+    // }
+
+    let obj_adj = {
+      name: nodes[i],
+      adj: temp_adj.reverse(),
+      // adj: temp_adj,
+      weight: temp_weighted_arcs
+    }
+    adjacents.push(obj_adj);
+      
+  }
+
+  for(let i= 0; i <adjacents.length; i++){
+    let edge_count_ob = {
+      name: adjacents[i].name,
+      num_of_edges: adjacents[i].adj.length,
+      weight_on_arc: adjacents[i].weight
+
+    }
+    edge_count.push(edge_count_ob);
+  }
+
+ 
+  path.push(edge_count[0]);
+  curr_vertex = 0; // index of the location of the current vertex in edge_count vector
+  let next_vertex;
+  
+  while (path.length != 0)
+  {
+ 
+    
+    if(edge_count[curr_vertex].num_of_edges )
+    {
+
+      //push current vertex
+      path.push(edge_count[curr_vertex]);
+      
+      for(let i=0; i < adjacents.length; i++){
+        if(adjacents[i].name == edge_count[curr_vertex].name)
+        {
+          let temp_next = adjacents[i].adj[adjacents[i].adj.length - 1];
+       
+          for(let j=0; j < edge_count.length; j++){
+            
+            if(edge_count[j].name == temp_next)
+            {
+             
+              next_vertex = j; // finds the index of the next vertex 
+              adjacents[i].adj.pop();
+              break;
+            }
+          }
+          break;
+        }
+      }
+ 
+      //remove the edge 
+      edge_count[curr_vertex].num_of_edges = edge_count[curr_vertex].num_of_edges - 1 ;
+  
+      //move on to the next edge
+      curr_vertex = next_vertex;
+  
+    }
+
+   
+
+  else{
+    // console.log("enters the else loop (BACKTRACKS): "); 
+    // console.log("this is what we are pushing into circuit: " + edge_count[curr_vertex].name);
+    circuit.push(edge_count[curr_vertex]);
+  
+    for(let i=0; i < edge_count.length; i ++){
+      
+      if(path[path.length - 1].name == edge_count[i].name)
+      { 
+        temp_var = i;
+      }      
+    }
+    
+      curr_vertex = temp_var;
+      path.pop();`  `
+    
+  }
+   
+  }
+
+  console.log(circuit.reverse()); // final result array without taking in account the nodes in edges
+ 
+  console.log("EULERIAN PATH: ");
+  // console.log(circuit);
+
+  let copy_of_nodes_and_weighted_arcs = [];
+
+  for(let j=0; j < nodes_and_weighted_arcs.length; j++){
+    let copy_obj = {
+      copy_first_node : nodes_and_weighted_arcs[j].firstNode,
+      copy_second_node : nodes_and_weighted_arcs[j].secondNode,
+      copy_weight : nodes_and_weighted_arcs[j].weightOnArc,
+      visited: false
+    }
+    copy_of_nodes_and_weighted_arcs.push(copy_obj);
+  }
+  
+   let final_result = [];
+  for(let i=1; i < circuit.length; i++){
+    // console.log(circuit[i - 1].name + "->");
+    final_result.push(circuit[i - 1].name );
+    for(let j=0; j < nodes_and_weighted_arcs.length; j++)
+    {
+      if(copy_of_nodes_and_weighted_arcs[j].visited != true) {
+        if(nodes_and_weighted_arcs[j].firstNode == circuit[i -1].name)
+       {
+          if(nodes_and_weighted_arcs[j].secondNode == circuit[i].name){
+            // console.log(nodes_and_weighted_arcs[j].weightOnArc);
+            if(nodes_and_weighted_arcs[j].weightOnArc != null){
+              final_result.push(nodes_and_weighted_arcs[j].weightOnArc);
+            }
+            // final_result.push(nodes_and_weighted_arcs[j].weightOnArc);
+            copy_of_nodes_and_weighted_arcs[j].visited = true;
+           break;
+          }
+          else{
+            continue;
+          }
+        }
+      }
+      else {
+        continue;
+      }
+    }
+    
+  }
+  console.log(final_result);
+}
+
+
 
 function createGraph(){
   graph = new jsnx.MultiDiGraph();
@@ -313,13 +491,15 @@ function createGraph(){
   // graph.addEdge("AC", "G");
   // graph.addEdge("G", "C");
   // graph
-
+  multigraphEulerianCircuit();
   jsnx.draw(graph, {
     element: '#canvas',
     withLabels: true,
     nodeAttr:{
       r: 15
     },
+    // withEdgeLabels: true,
     stickyDrag: true
 });
+
 }
