@@ -6,8 +6,25 @@
   display: inline-flex;
 } */
 
-#canvas{
+#canvas-outer{
   display: inline-flex;
-  height: 200px;
-  width: 200px;
+  height: 300px;
+  width: 300px;
+  border: solid;
+  margin: 20px;
+}
+
+.jsnx{
+  width: 300px;
+  height:300px;
+}
+
+.preliminary{
+  margin: 20px;
+}
+
+.graph-construction{
+  margin-top: 20px;
+  margin-right: 20px;
+  margin-bottom: 20px;
 }
